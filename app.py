@@ -432,7 +432,7 @@ elif choice == "Question Answering":
 st.markdown("""
 <div style="text-align:center;margin-top:3rem;padding-bottom:2rem">
     <p style="color:var(--muted);font-size:.75rem;font-family:'DM Mono',monospace">
-        Built with 🤗 Transformers · Streamlit · Distil* models
+        Built with 🤗 Transformers · Streamlit · Distil* models by Ameed Aburub
     </p>
 </div>
 """, unsafe_allow_html=True)
