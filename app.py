@@ -267,7 +267,11 @@ def load_generation():
 
 @st.cache_resource(show_spinner=False)
 def load_qa():
-    return pipeline("question-answering", model="distilbert-base-cased-distilled-squad")
+    from transformers import AutoTokenizer, AutoModelForQuestionAnswering, QuestionAnsweringPipeline
+    model_name = "distilbert-base-cased-distilled-squad"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForQuestionAnswering.from_pretrained(model_name)
+    return QuestionAnsweringPipeline(model=model, tokenizer=tokenizer)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
