@@ -1,6 +1,7 @@
 import streamlit as st
 from transformers import pipeline
 import time
+import requests
 
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -265,13 +266,13 @@ def load_sentiment():
 def load_generation():
     return pipeline("text-generation", model="distilgpt2")
 
-@st.cache_resource(show_spinner=False)
-def load_qa():
-    from transformers import AutoTokenizer, AutoModelForQuestionAnswering, QuestionAnsweringPipeline
-    model_name = "distilbert-base-cased-distilled-squad"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForQuestionAnswering.from_pretrained(model_name)
-    return QuestionAnsweringPipeline(model=model, tokenizer=tokenizer)
+def run_qa(question, context):
+    """Calls the HF Inference API — no local model needed."""
+    api_url = "https://api-inference.huggingface.co/models/distilbert-base-cased-distilled-squad"
+    payload = {"inputs": {"question": question, "context": context}}
+    resp = requests.post(api_url, json=payload, timeout=30)
+    resp.raise_for_status()
+    return resp.json()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -397,10 +398,8 @@ elif choice == "Question Answering":
         else:
             try:
                 with st.spinner("Extracting answer…"):
-                    pipe   = load_qa()
-                    result = pipe(question=question, context=context)
+                    result = run_qa(question, context)
 
-                # result may be a dict or a list depending on transformers version
                 if isinstance(result, list):
                     result = result[0]
 
@@ -432,7 +431,7 @@ elif choice == "Question Answering":
 st.markdown("""
 <div style="text-align:center;margin-top:3rem;padding-bottom:2rem">
     <p style="color:var(--muted);font-size:.75rem;font-family:'DM Mono',monospace">
-        Built with 🤗 Transformers · Streamlit · Distil* models by Ameed Aburub
+        Built with 🤗 Transformers · Streamlit · Distil* models
     </p>
 </div>
 """, unsafe_allow_html=True)
