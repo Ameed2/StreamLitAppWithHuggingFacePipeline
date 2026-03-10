@@ -391,26 +391,37 @@ elif choice == "Question Answering":
         if not context.strip() or not question.strip():
             st.warning("Please provide both a context and a question.")
         else:
-            with st.spinner("Extracting answer…"):
-                pipe   = load_qa()
-                result = pipe(question=question, context=context)
+            try:
+                with st.spinner("Extracting answer…"):
+                    pipe   = load_qa()
+                    result = pipe(question=question, context=context)
 
-            answer = result["answer"]
-            score  = result["score"]
+                # result may be a dict or a list depending on transformers version
+                if isinstance(result, list):
+                    result = result[0]
 
-            st.markdown(f"""
-            <div class="result-wrap">
-                <div class="result-label">Extracted answer</div>
-                <div class="result-main neutral">"{answer}"</div>
-                <div style="color:var(--muted);font-size:.85rem;margin-top:.5rem">
-                    Confidence: <strong style="color:var(--text)">{score*100:.1f}%</strong>
-                </div>
-                <div class="conf-bar-bg">
-                    <div class="conf-bar" style="width:{score*100:.1f}%"></div>
-                </div>
-            </div>
-            <div class="model-chip">🤖 Model: <span>distilbert-squad</span></div>
-            """, unsafe_allow_html=True)
+                answer = result.get("answer", "").strip()
+                score  = float(result.get("score", 0.0))
+
+                if not answer:
+                    st.warning("The model couldn't find an answer in the provided context.")
+                else:
+                    st.markdown(f"""
+                    <div class="result-wrap">
+                        <div class="result-label">Extracted answer</div>
+                        <div class="result-main neutral">"{answer}"</div>
+                        <div style="color:var(--muted);font-size:.85rem;margin-top:.5rem">
+                            Confidence: <strong style="color:var(--text)">{score*100:.1f}%</strong>
+                        </div>
+                        <div class="conf-bar-bg">
+                            <div class="conf-bar" style="width:{score*100:.1f}%"></div>
+                        </div>
+                    </div>
+                    <div class="model-chip">🤖 Model: <span>distilbert-squad</span></div>
+                    """, unsafe_allow_html=True)
+
+            except Exception as e:
+                st.error(f"Model error: {e}")
 
 
 # ── Footer ────────────────────────────────────────────────────────────────────
