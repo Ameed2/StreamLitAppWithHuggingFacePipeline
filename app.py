@@ -268,7 +268,7 @@ def load_generation():
 
 def run_qa(question, context):
     """Calls the HF Inference API — no local model needed."""
-    api_url = "https://api-inference.huggingface.co/models/distilbert-base-cased-distilled-squad"
+    api_url = "https://router.huggingface.co/hf-inference/models/distilbert-base-cased-distilled-squad"
     payload = {"inputs": {"question": question, "context": context}}
     resp = requests.post(api_url, json=payload, timeout=30)
     resp.raise_for_status()
